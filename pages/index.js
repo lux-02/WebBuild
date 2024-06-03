@@ -18,16 +18,42 @@ const HomePage = () => {
       content,
     };
 
-    // GPT API 호출
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userInputs),
-    });
-    const data = await res.json();
-    setPageName(data.pageName);
+    try {
+      // SRS 생성
+      const srsRes = await fetch("/api/generate-srs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userInputs),
+      });
+      const { srs } = await srsRes.json();
+      console.log(srs);
+
+      // 코드 생성
+      const codeRes = await fetch("/api/generate-code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ srs }),
+      });
+      const { code } = await codeRes.json();
+
+      // 페이지 생성
+      const generatedPageName = `generated-page-${Date.now()}.js`;
+      const pageRes = await fetch("/api/create-page", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ code, pageName: generatedPageName }),
+      });
+      const data = await pageRes.json();
+      setPageName(data.pageName);
+    } catch (error) {
+      console.error("Error during page generation:", error);
+    }
   };
 
   return (

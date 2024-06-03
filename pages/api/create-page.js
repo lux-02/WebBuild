@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-
 export default async function handler(req, res) {
   const { code, pageName } = req.body;
 
@@ -39,7 +38,7 @@ ${componentCodeLines.join("\n")}
   try {
     // 페이지 파일 생성
     fs.writeFileSync(pagePath, componentCode);
-    res.status(200).json({ message: "Page created successfully" });
+    res.status(200).json({ pageName });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error creating page" });
