@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 1. Specific Requirements
 2. UI/UX Design
 3. Accessibility Considerations
-Provide detailed information on the functionalities and design accessibility aspects of the website.`;
+Include sections where images should be placed, and provide appropriate keywords for those images from Unsplash.`;
 
   try {
     const completion = await openai.chat.completions.create({

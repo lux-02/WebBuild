@@ -28,7 +28,6 @@ const HomePage = () => {
         body: JSON.stringify(userInputs),
       });
       const { srs } = await srsRes.json();
-      console.log(srs);
 
       // 코드 생성
       const codeRes = await fetch("/api/generate-code", {
@@ -36,7 +35,7 @@ const HomePage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ srs }),
+        body: JSON.stringify({ srs, websiteType, features }), // websiteType과 features를 전달
       });
       const { code } = await codeRes.json();
 
