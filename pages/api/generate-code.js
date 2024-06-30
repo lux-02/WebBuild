@@ -1,34 +1,21 @@
+// api/generate-code.js
 import OpenAI from "openai";
-import unsplash from "./unsplash";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function getUnsplashImage(keyword) {
-  const result = await unsplash.search.getPhotos({
-    query: keyword,
-    perPage: 1,
-  });
-
-  if (result.response && result.response.results.length > 0) {
-    return result.response.results[0].urls.regular;
-  } else {
-    return null;
-  }
-}
-
-async function extractKeywords(text) {
-  const res = await fetch("http://localhost:3000/api/extract-keywords", {
+async function getDalleImage(prompt) {
+  const res = await fetch("http://localhost:3000/api/dalle", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ prompt: prompt }),
   });
 
   const data = await res.json();
-  return data.keywords;
+  return data.url;
 }
 
 export default async function handler(req, res) {
@@ -45,14 +32,65 @@ export default async function handler(req, res) {
   - A features section highlighting key features with icons and descriptions
   - A content section with placeholder text and images
   - A footer with links to social media and contact information
+  - Use react-icons for icons (e.g., FaComments, FaRegEdit, FaSearch, FaUserShield)
+  - Use Roboto and Open Sans fonts
+
+  Return only the JavaScript code for the component. Do not include any explanations, comments, or descriptions. Only the code.
   
-  Return only the JavaScript code for the component. Do not include any explanations, comments, or descriptions. Only the code.`;
+  Here is an example of the structure you should follow:
+
+  
+  import React from 'react';
+import { ChakraProvider, Box, Flex, Heading, Text, Button, Image, Link, Icon, Grid, extendTheme } from '@chakra-ui/react';
+import 'tailwindcss/tailwind.css';
+import { FaComments, FaRegEdit, FaSearch, FaUserShield } from 'react-icons/fa'; // Consolidated import
+import '@fontsource/roboto';
+import '@fontsource/open-sans';
+
+const theme = extendTheme({
+  fonts: {
+    heading: "Roboto, sans-serif",
+    body: "Open Sans, sans-serif",
+  },
+});
+
+const BlogComponent = () => {
+  return (
+    <Box>
+      <header className="bg-cover bg-center h-64" style={{ backgroundImage: "url(${heroImage})" }}>
+        <h1 className="text-4xl text-white">Welcome to Our Blog</h1>
+        <Button>Get Started</Button>
+      </header>
+      <section>
+        <h2>Features</h2>
+        <div className="flex">
+          <div className="w-1/3">
+            <img src={featureImage} alt="Feature" />
+            <p>Feature description</p>
+          </div>
+          <Box className="text-center">
+            <Text className="text-4xl mb-2"><FaComments /></Text>
+            <Text className="font-bold">Comment System</Text>
+            <Text>Engage with readers.</Text>
+          </Box>
+        </div>
+      </section>
+    </Box>
+  );
+};
+
+export default function Page() {
+  return (
+    <ChakraProvider theme={theme}>
+      <BlogComponent />
+    </ChakraProvider>
+  );
+}
+
+  
+  `;
 
   try {
-    // Extract keywords
-    const websiteTypeKeywords = await extractKeywords(websiteType);
-    const featuresKeywords = await extractKeywords(features);
-
     const completion = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [{ role: "system", content: prompt }],
@@ -63,13 +101,37 @@ export default async function handler(req, res) {
 
     generatedCode = generatedCode.replace(/```(javascript)?/g, "").trim();
 
-    // Fetch images from Unsplash using the extracted keywords
-    const heroImage = await getUnsplashImage(websiteTypeKeywords);
-    const featureImage = await getUnsplashImage(featuresKeywords);
+    // Fetch images from DALL-E using the extracted keywords
+    const heroImage = await getDalleImage(
+      `hero image for ${websiteType} website`
+    );
+    const featureImage = await getDalleImage(`feature image for ${features}`);
 
     // Replace placeholders with image URLs
     generatedCode = generatedCode.replace("{heroImage}", heroImage || "");
     generatedCode = generatedCode.replace("{featureImage}", featureImage || "");
+
+    // Extract icon imports and avoid duplicates
+    const iconMatches =
+      generatedCode.match(/import {([^}]+)} from 'react-icons\/fa';/g) || [];
+    const iconSet = new Set();
+    iconMatches.forEach((match) => {
+      const icons = match.match(/Fa\w+/g);
+      icons.forEach((icon) => iconSet.add(icon));
+    });
+
+    const iconImports = `import { ${Array.from(iconSet).join(
+      ", "
+    )} } from 'react-icons/fa';\n`;
+
+    // Add font imports
+    const fontImports = `import '@fontsource/roboto';\nimport '@fontsource/open-sans';\n`;
+
+    generatedCode = generatedCode.replace(
+      /import {([^}]+)} from 'react-icons\/fa';/g,
+      ""
+    ); // Remove all previous icon imports
+    generatedCode = iconImports + fontImports + generatedCode; // Add the consolidated icon and font imports
 
     res.status(200).json({ code: generatedCode });
   } catch (error) {

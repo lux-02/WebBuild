@@ -35,7 +35,7 @@ const HomePage = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ srs, websiteType, features }), // websiteType과 features를 전달
+        body: JSON.stringify({ srs, websiteType, features }),
       });
       const { code } = await codeRes.json();
 

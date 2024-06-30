@@ -1,3 +1,4 @@
+// api/generate-srs.js
 import OpenAI from "openai";
 
 const openai = new OpenAI({
@@ -10,7 +11,7 @@ export default async function handler(req, res) {
 1. Specific Requirements
 2. UI/UX Design
 3. Accessibility Considerations
-Include sections where images should be placed, and provide appropriate keywords for those images from Unsplash.`;
+Include sections where images should be placed, and provide appropriate keywords for those images from Unsplash or DALL-E.`;
 
   try {
     const completion = await openai.chat.completions.create({

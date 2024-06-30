@@ -12,21 +12,47 @@ export default async function handler(req, res) {
 Here is an example of the structure you should follow:
 
 import React from 'react';
-import { ChakraProvider } from '@chakra-ui/react';
-import { Box, Button, Input } from '@chakra-ui/react';
+import { ChakraProvider, Box, Flex, Heading, Text, Button, Image, Link, Icon, Grid } from '@chakra-ui/react';
 import 'tailwindcss/tailwind.css';
+import { FaComments, FaRegEdit, FaSearch, FaUserShield } from 'react-icons/fa'; // Consolidated import
+import '@fontsource/roboto';
+import '@fontsource/open-sans';
+
+const theme = extendTheme({
+  fonts: {
+    heading: "Roboto, sans-serif",
+    body: "Open Sans, sans-serif",
+  },
+});
 
 const BlogComponent = () => {
   return (
     <Box>
-      {/* Your component code here */}
+      <header className="bg-cover bg-center h-64" style={{ backgroundImage: `url(${heroImage})` }}>
+        <h1 className="text-4xl text-white">Welcome to Our Blog</h1>
+        <Button>Get Started</Button>
+      </header>
+      <section>
+        <h2>Features</h2>
+        <div className="flex">
+          <div className="w-1/3">
+            <img src={featureImage} alt="Feature" />
+            <p>Feature description</p>
+          </div>
+          <Box className="text-center">
+            <Text className="text-4xl mb-2"><FaComments /></Text>
+            <Text className="font-bold">Comment System</Text>
+            <Text>Engage with readers.</Text>
+          </Box>
+        </div>
+      </section>
     </Box>
   );
 };
 
 export default function Page() {
   return (
-    <ChakraProvider>
+    <ChakraProvider theme={theme}>
       <BlogComponent />
     </ChakraProvider>
   );
